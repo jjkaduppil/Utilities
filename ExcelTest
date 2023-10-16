@@ -1,1 +1,112 @@
 
+package com.test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+
+public class ExcelTest {
+	public static void main(String[] args) throws ParseException {
+		
+		try {
+			new ExcelTest().exportExcel();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+    public void exportExcel() throws IOException, ParseException {
+
+    // Creation workbook 
+    XSSFWorkbook workbook = new XSSFWorkbook();
+    XSSFSheet sheet = workbook.createSheet("User");
+    CellStyle cellStyle;
+    List<User> list = this.getAllUsers();
+    int rownum = 0;
+    int cellnum = 0;
+    Row headerRow = sheet.createRow(rownum++);
+    Cell cell = headerRow.createCell(cellnum++);
+    cell.setCellValue("First Name");
+    cell = headerRow.createCell(cellnum++);
+    cell.setCellValue("Last Name");
+    cell = headerRow.createCell(cellnum++);
+    cell.setCellValue("DOB");
+    
+    
+    for (User user: list) {
+    	cellnum = 0;
+        Row row = sheet.createRow(rownum++);
+        cell = row.createCell(cellnum++);
+        cell.setCellValue(user.getFirstName());
+        cell = row.createCell(cellnum++);
+        cell.setCellValue(user.getLastName());
+        cell = row.createCell(cellnum++);
+
+        // creating date type column
+        cellStyle = workbook.createCellStyle();
+        CreationHelper createHelper = workbook.getCreationHelper();
+        cellStyle.setDataFormat(
+            createHelper.createDataFormat().getFormat("mm-dd-yyyy"));
+        cell.setCellValue(user.getDob());
+        cell.setCellStyle(cellStyle);   
+    }
+
+    ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
+    workbook.write(outByteStream);
+
+    FileOutputStream outFile =new FileOutputStream(new File("C:\\test\\test.xlsx"));
+    workbook.write(outFile);
+    workbook.close();
+    outFile.flush();
+    outFile.close();
+}
+
+	private List<User> getAllUsers() throws ParseException {
+		String pattern = "MM-dd-yyyy";
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+		List<User> list = new ArrayList<>();
+		User user = new User();
+		user = new User();
+		user.setFirstName("Tom1");
+		user.setLastName("Jerry1");
+		
+		user.setDob(null);
+		list.add(user);
+		
+		user = new User();
+		user.setFirstName("Tom1");
+		user.setLastName("Jerry1");
+		user.setDob(simpleDateFormat.parse("10-10-2023"));
+		list.add(user);
+		
+		user = new User();
+		user.setFirstName("Tom2");
+		user.setLastName("Jerry1");
+		user.setDob(simpleDateFormat.parse("08-10-2023"));
+		list.add(user);
+		
+		user = new User();
+		user.setFirstName("Tom2");
+		user.setLastName("Jerry1");
+		user.setDob(simpleDateFormat.parse("03-10-2022"));
+		list.add(user);
+		return list;
+	}
+}
